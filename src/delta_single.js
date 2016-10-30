@@ -46,7 +46,10 @@ function main(options) {
     rebuildAST();
 
     var minimise_array = function(array, nonempty){
-      reduction_util.minimise_array(array, test, minimise, nonempty);
+      reduction_util.reduce_array(array, test, nonempty);
+      // now minimise each element in turn
+      for (var j = 0; j < array.length; ++j)
+        minimise(array[j], array, j);
     }
 
     // get started

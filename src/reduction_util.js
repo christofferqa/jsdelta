@@ -1,4 +1,10 @@
-function minimise_array(array, test, minimise, nonempty) {
+/**
+ * Reduces an <array> by mutating it to find a locally smallest version
+ * that the <test> predicate holds for.
+ *
+ * If <nonempty> is true, the empty array result is avoided.
+ */
+function reduce_array(array, test, nonempty) {
   if (!nonempty && array.length === 1) {
     // special case: if there is only one element, try removing it
     var elt = array[0];
@@ -30,10 +36,6 @@ function minimise_array(array, test, minimise, nonempty) {
       }
     }
   }
-
-  // now minimise each element in turn
-  for (var j = 0; j < array.length; ++j)
-    minimise(array[j], array, j);
 }
 
-exports.minimise_array = minimise_array;
+exports.reduce_array = reduce_array;
