@@ -6,7 +6,8 @@ var fs = require("fs-extra"),
     file_util = require("./file_util"),
     transformations = require("./transformations"),
     config = require("../config"),
-    logging = require("./logging");
+    logging = require("./logging"),
+    reduction_util = require("./reduction_util");
 /**
  * The "Original" JSDelta AST-mininizer.
  *
@@ -43,6 +44,10 @@ function main(options) {
     fs.writeFileSync(smallest, input);
 
     rebuildAST();
+
+    var minimise_array = function(array, nonempty){
+      reduction_util.minimise_array(array, test, minimise, nonempty);
+    }
 
     // get started
     var res = options.predicate.test(orig);
@@ -89,47 +94,6 @@ function main(options) {
     function log_debug(msg) {
         if (DEBUG)
             logging.log(msg);
-    }
-
-    function minimise_array(array, nonempty) {
-        log_debug("minimising array " + util.inspect(array, false, 1));
-        if (!nonempty && array.length === 1) {
-            // special case: if there is only one element, try removing it
-            var elt = array[0];
-            array.length = 0;
-            if (!test())
-            // didn't work, need to put it back
-                array[0] = elt;
-        } else {
-            // try removing as many chunks of size sz from array as possible
-            // once we're done, switch to size sz/2; if size drops to zero,
-            // recursively invoke minimise on the individual elements
-            // of the array
-            for (var sz = array.length >>> 1; sz > 0; sz >>>= 1) {
-                log_debug("  chunk size " + sz);
-                var nchunks = Math.floor(array.length / sz);
-                for (var i = nchunks - 1; i >= 0; --i) {
-                    // try removing chunk i
-                    log_debug("    chunk #" + i);
-                    var lo = i * sz,
-                        hi = i === nchunks - 1 ? array.length : (i + 1) * sz;
-
-                    // avoid creating empty array if nonempty is set
-                    if (!nonempty || lo > 0 || hi < array.length) {
-                        var removed = array.splice(lo, hi - lo);
-                        if (!test()) {
-                            // didn't work, need to put it back
-                            Array.prototype.splice.apply(array,
-                                [lo, 0].concat(removed));
-                        }
-                    }
-                }
-            }
-        }
-
-        // now minimise each element in turn
-        for (var j = 0; j < array.length; ++j)
-            minimise(array[j], array, j);
     }
 
 // the main minimisation function
@@ -319,4 +283,3 @@ function main(options) {
 
 }
 module.exports.reduce = main;
-
