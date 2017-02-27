@@ -66,13 +66,18 @@ function main(options) {
     // the smallest test case so far is kept here
     var smallest = state.tmp_dir + "/delta_js_smallest." + state.ext;
 
-
     // save a copy of the original input
     var orig = file_util.getTempFileName(state);
+
+    // perform preprocessing
+    if (options.predicate.preprocess) {
+        input = options.predicate.preprocess(input);
+    }
 
     fs.writeFileSync(orig, input);
     fs.writeFileSync(smallest, input);
 
+    // check for syntax errors
     if (!isSyntacticallyValid(input)) {
         logging.error("Original file is not syntactically valid.");
         process.exit(1);
