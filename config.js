@@ -9,5 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+var mkdirp = require('mkdirp');
+var path = require('path');
+
+var rootdir = path.dirname(__dirname);
+var outdir = path.join(rootdir, 'out', 'jsdelta');
+
+mkdirp.sync(outdir);
+
 // directory in which to create temporary files
-exports.tmp_dir = "/tmp";
+exports.tmp_dir = outdir;
